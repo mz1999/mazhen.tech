@@ -1,6 +1,6 @@
 ---
 title: "TiDB Insert 执行流程图"
-date: 2022-05-15T14:38:05+08:00
+date: 2018-05-15T14:38:05+08:00
 draft: false
 tags: [db]
 categories: [tech]

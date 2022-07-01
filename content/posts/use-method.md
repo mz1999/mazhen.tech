@@ -15,7 +15,6 @@ categories: [tech]
     3. 将问题转交个负责这个组件的团队
     4. 如果证明是错误的，重复步骤1
 
-
 - **路灯法**
 没有系统的方法论，只是使用自己擅长的工具去观察，而不管问题到底出现在哪儿。就像丢了钥匙的人去路灯下寻找，仅仅是因为路灯下比较亮。这种行为被称为[路灯效应](http://en.wikipedia.org/wiki/Streetlight_effect)。
 
@@ -27,6 +26,7 @@ categories: [tech]
 >For every resource, check utilization, saturation, and errors.
 
 术语解释
+
 - **resource**：CPU，内存，磁盘，网络等一切物理设备资源
 - **utilization**：资源利用率。例如CPU的资源利用率90%
 - **saturation**：当资源繁忙时仍能接收新的任务，这些额外的任务一般都放入了等待队列。`saturation`就表现为队列的长度，例如CPU的平均运行队列为4（Linux上使用vmstat命令获得）。
