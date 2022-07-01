@@ -6,8 +6,6 @@ tags: [java, networking]
 categories: [tech]
 ---
 
-# 为Wireshark编写HSF2协议解析插件
-
 `Wireshark`是排查网络问题最常用的工具，它已经内置支持了上百种通用协议，同时它的扩展性也很好，对于自定义的应用层网络协议，你可以使用`c`或者`lua`编写协议解析插件，这样你就可以在`Wireshark`中观察到协议的内容而不是二进制流，为排查问题带来一定的便利性。
 
 最近在排查一个`HSF`超时的问题，顺便花了些时间为`Wireshark`写了一个`HSF2`协议解析插件，目前支持`HSF2`的`request`、`response`和`heart beat`协议，支持将多个`packet`还原为上层`PDU`。暂不支持HSF原先的TB Remoting协议。先看效果。

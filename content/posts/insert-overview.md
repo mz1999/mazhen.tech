@@ -6,8 +6,6 @@ tags: [db]
 categories: [tech]
 ---
 
-# TiDB Insert 执行流程图
-
 TiDB源码解读系列的[《Insert语句概览》](https://pingcap.com/blog-cn/tidb-source-code-reading-4/)讲解了`Insert`执行的整体流程，并在最后用一幅图描述了整个流程：
 
 ![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011439770.png)

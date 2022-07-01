@@ -2,7 +2,7 @@
 title: "Linux内核参数的配置方法"
 date: 2014-05-30T20:21:08+08:00
 draft: false
-tags: [linux]
+tags: [linux,kernel]
 categories: [tech]
 ---
 
