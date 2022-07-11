@@ -6,7 +6,7 @@ tags: [docker,linux,networking]
 categories: [tech]
 ---
 
-容器的跨主机通信主要有两种方式：封包模式和路由模式。[上一篇文章](./docker-overlay-networks/)演示了使用`VXLAN`协议的封包模式，这篇将介绍另一种方式，利用三层网络的路由转发实现容器的跨主机通信。
+容器的跨主机通信主要有两种方式：封包模式和路由模式。[上一篇文章](/docker-overlay-networks)演示了使用`VXLAN`协议的封包模式，这篇将介绍另一种方式，利用三层网络的路由转发实现容器的跨主机通信。
 
 ## 路由模式概述
 
@@ -29,12 +29,11 @@ categories: [tech]
 
 ## 动手实验
 
-![route](https://cdn.mazhen.tech//images/202207112201327.png)
-
+![route](https://cdn.mazhen.tech/images/202207112201327.png)
 
 路由模式的实验比较简单，关键在于宿主机上路由规则的配置。为了简化实验，这些路由规则都是我们手工配置，而且两个节点之间二层网络互通，没有跨网段。
 
-参照[Docker跨主机Overlay网络动手实验](./docker-overlay-networks.md)，创建“容器”，`veth pairs`，`bridge`，设置IP，激活虚拟设备。
+参照[Docker跨主机Overlay网络动手实验](/docker-overlay-networks)，创建“容器”，`veth pairs`，`bridge`，设置IP，激活虚拟设备。
 
 然后在`node-1`上增加路由规则：
 
@@ -61,7 +60,6 @@ $ ip route
 
 到达`node-2`的IP包，会根据这条规则路由到网桥`br0`，最终到达`docker-2`。反过来从`docker2`访问`docker1`的过程也是类似。
 
-
 ## 总结
 
 两种容器跨主机的通信方案我们都实验了一下，现在做个简单总结对比：
@@ -69,9 +67,8 @@ $ ip route
 * **封包模式**对基础设施要求低，三层网络通就可以了。但封包、解包带来的性能损耗较大。
 * **路由模式**性能好，但要求二层网络连通，或者在跨网段的情况下，要求路由器能配合“学习”路由规则。
 
-
 至此，容器网络的三篇系列完成：
 
-* [Docker单机网络模型动手实验](./docker-network-bridge/)
-* [Docker跨主机Overlay网络动手实验](./docker-overlay-networks/)
+* [Docker单机网络模型动手实验](/docker-network-bridge)
+* [Docker跨主机Overlay网络动手实验](/docker-overlay-networks)
 * Docker跨主机通信路由模式动手实验（本篇）

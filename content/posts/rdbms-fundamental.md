@@ -195,7 +195,7 @@ R ⋈ <sub> A\<D  AND  R.B ≠ S.B</sub> S 的结果是：
 
 一般查询处理可以简单的划分为以下几个步骤：
 
-<img src="https://cdn.mazhen.tech//images/202207011706716.png" style="zoom:50%;" />
+<img src="https://cdn.mazhen.tech/images/202207011706716.png" style="zoom:50%;" />
 
 1. 对SQL进行语法分析，将查询语句转换成**抽象语法树**。
 2. 把**抽象语法树**转换成**关系代数表达式树**，这就是初始的**逻辑查询计划**。
@@ -237,7 +237,7 @@ WHERE employees.emp_no = salaries.emp_no AND
 
 `SQL Parser`的功能是把SQL语句按照SQL语法规则进行解析，将文本转换成**抽象语法树**（AST）。具体的实现可以参考这篇文章[《TiDB SQL Parser 的实现》](https://github.com/mz1999/Apusic-db-team/blob/master/docs/sql-parser.md)。 示例SQL解析完成后得到下面的语法树：
 
-![](https://cdn.mazhen.tech//images/202207011707079.png)
+![](https://cdn.mazhen.tech/images/202207011707079.png)
 
 ### 生成逻辑查询计划
 
@@ -249,7 +249,7 @@ WHERE employees.emp_no = salaries.emp_no AND
 
 我们得到下面的关系代数表达式树：
 
-<img src="https://cdn.mazhen.tech//images/202207011707826.png" style="zoom:67%;" />
+<img src="https://cdn.mazhen.tech/images/202207011707826.png" style="zoom:67%;" />
 
 ### 逻辑查询计划的改进
 
@@ -302,7 +302,7 @@ R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S)
 
 从右向左使用，把**笛卡尔积**转换成**连接**。使用了两个定律后，得到优化后的逻辑查询计划如下图：
 
-<img src="https://cdn.mazhen.tech//images/202207011708287.png" style="zoom:67%;" />
+<img src="https://cdn.mazhen.tech/images/202207011708287.png" style="zoom:67%;" />
 
 ### 物理查询计划的生成
 
@@ -370,7 +370,7 @@ R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S)
 
 最后，假定我们在所有选择的组合中，确定了其中一个作为最优的物理查询计划，然后就可以把它交给查询执行器真正的执行了：
 
-<img src="https://cdn.mazhen.tech//images/202207011710602.png" style="zoom:50%;" />
+<img src="https://cdn.mazhen.tech/images/202207011710602.png" style="zoom:50%;" />
 
 ## 写在最后
 

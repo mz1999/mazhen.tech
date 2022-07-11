@@ -6,9 +6,9 @@ tags: [docker,linux,networking]
 categories: [tech]
 ---
 
-[上一篇文章](./docker-network-bridge/)我演示了`docker bridge`网络模型的实验，这次我将展示如何利用`Overlay 网络`实现跨主机容器的通信。
+[上一篇文章](/docker-network-bridge)我演示了`docker bridge`网络模型的实验，这次我将展示如何利用`Overlay 网络`实现跨主机容器的通信。
 
-![cross nodes](https://cdn.mazhen.tech//images/202207112154262.png)
+![cross nodes](https://cdn.mazhen.tech/images/202207112154262.png)
 
 两个容器`docker1`和`docker2`分别位于节点`Node-1`和`Node-2`，如何实现容器的跨主机通信呢？一般来说有两种实现方式：
 
@@ -17,7 +17,7 @@ categories: [tech]
 
 本文主要介绍封包模式。`Overlay`网络主要有两种方式，一种是使用UDP在用户态封装，一种是利用`VXLAN` 在内核态封装。由于减少了用户态到内核态的切换，封包解包逻辑都在内核态进行，`VXLAN` 的性能更好，成为了容器网络的主流方案。
 
-关于路由模式，会在[下一篇文章](./docker-route-networks/)介绍。
+关于路由模式，会在[下一篇文章](/docker-route-networks)介绍。
 
 ## VXLAN
 
@@ -25,7 +25,7 @@ categories: [tech]
 
 `VXLAN` packet的结构：
 
-![vxlan](https://cdn.mazhen.tech//images/202207112155616.png)
+![vxlan](https://cdn.mazhen.tech/images/202207112155616.png)
 
 我们可以看到，最内部是原始的二层网络包，外面加上一个`VXLAN header`，其中最重要的是`VNI`（VXLAN network identifier)字段，它用来唯一标识一个`VXLAN`。也就是说，使用不同的`VNI`来区分不同的虚拟二层网络。`VNI`有24位，基本够公用云厂商使用了。要知道原先用来网络隔离的虚拟局域网VLAN只支持4096个虚拟网络。
 
@@ -37,8 +37,7 @@ categories: [tech]
 
 参照[Flannel](https://github.com/coreos/flannel)的实现方案：
 
-![flannel](https://cdn.mazhen.tech//images/202207112156887.png)
-
+![flannel](https://cdn.mazhen.tech/images/202207112156887.png)
 
 * **配置内核参数，允许IP forwarding**
 
@@ -62,7 +61,7 @@ sudo ip netns add docker1
 sudo ip netns add docker2
 ```
 
-为什么创建个`Namesapce`就说是“容器”？请参考[上一篇文章](./docker-network-bridge.md)。
+为什么创建个`Namesapce`就说是“容器”？请参考[上一篇文章](/docker-network-bridge)。
 
 * **创建Veth pairs**
 
@@ -224,11 +223,11 @@ sudo bridge fdb append 0e:e6:e6:5d:c2:da dev vxlan100 dst 192.168.31.192
 
 我们可以确认下执行结果：
 
-![node-1](https://cdn.mazhen.tech//images/202207112157782.png)
+![node-1](https://cdn.mazhen.tech/images/202207112157782.png)
 
 `ARP`中已经记录了`Node-2`上容器IP对应的MAC地址。再看看`FDB`的情况：
 
-![node-2](https://cdn.mazhen.tech//images/202207112158834.png)
+![node-2](https://cdn.mazhen.tech/images/202207112158834.png)
 
 根据最后一条新增规则，我们可以知道如何到达`Node-2`上“隧道”的出口`vxlan100`。“隧道”两端是使用UDP进行传输，即容器间通讯的二层网络包是靠UDP在宿主机之间通信。
 
@@ -276,7 +275,7 @@ sudo ip link del vxlan100
 
 Docker原生的[overlay driver](https://docs.docker.com/network/overlay/)底层也是使用`VXLAN`技术，但实现方案和[Flannel](https://github.com/coreos/flannel)略有不同：
 
-![overlay driver](https://cdn.mazhen.tech//images/202207112159004.png)
+![overlay driver](https://cdn.mazhen.tech/images/202207112159004.png)
 
 我们可以看到，`vxlan100`被“插”在了虚拟交换机`br0`上，虚拟网络数据包从`br0`到`vxlan100`不是通过本机路由，而是`vxlan100`根据`FDB`直接进行了转发。
 
@@ -360,4 +359,4 @@ sudo bridge fdb append [docker1的MAC地址]  dev vxlan100 dst 192.168.31.183
 
 相信通过亲自动手实验，容器网络对你来说不再神秘。希望本文对你理解容器网络有所帮助。
 
-下一篇我将动手实验容器跨主机通信的[路由模式](./docker-route-networks/)。
+下一篇我将动手实验容器跨主机通信的[路由模式](/docker-route-networks)。

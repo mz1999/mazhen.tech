@@ -10,7 +10,7 @@ categories: [tech]
 
 容器的本质就是一个进程，只不过对它进行了`Linux Namesapce`隔离，让它看不到外面的世界，用`Cgroups`限制了它能使用的资源，同时利用系统调用`pivot_root`或`chroot`切换了进程的根目录，把容器镜像挂载为根文件系统`rootfs`。`rootfs`中不仅有要运行的应用程序，还包含了应用的所有依赖库，以及操作系统的目录和文件。`rootfs`打包了应用运行的完整环境，这样就保证了在开发、测试、线上等多个场景的一致性。
 
-![docker](https://cdn.mazhen.tech//images/202207112142723.png)
+![docker](https://cdn.mazhen.tech/images/202207112142723.png)
 
 从上图可以看出，容器和虚拟机的最大区别就是，每个虚拟机都有独立的操作系统内核`Guest OS`，而容器只是一种特殊的进程，它们共享同一个操作系统内核。
 
@@ -28,12 +28,11 @@ categories: [tech]
 
 如何让容器之间互相连接保持网络通畅，Docker有多种网络模型。对于单机上运行的多个容器，可以使用缺省的[bridge网络驱动](https://docs.docker.com/network/bridge/)。而容器的跨主机通信，一种常用的方式是利用`Overlay 网络`，基于物理网络的虚拟化网络来实现。
 
-本文会在单机上实验展示[bridge网络模型](https://docs.docker.com/network/bridge/)，揭示其背后的实现原理。[下一篇文章](./docker-overlay-networks/)会演示容器如何利用`Overlay 网络`进行跨主机通信。
+本文会在单机上实验展示[bridge网络模型](https://docs.docker.com/network/bridge/)，揭示其背后的实现原理。[下一篇文章](/docker-overlay-networks)会演示容器如何利用`Overlay 网络`进行跨主机通信。
 
 我们按照下图创建网络拓扑，让容器之间网络互通，从容器内部可以访问外部资源，同时，容器内可以暴露服务让外部访问。
 
-![local](https://cdn.mazhen.tech//images/202207112143366.png)
-
+![local](https://cdn.mazhen.tech/images/202207112143366.png)
 
 在开始动手实验之前，先简单介绍一下`bridge网络模型`会用到的Linux虚拟化网络技术。
 
@@ -55,7 +54,7 @@ categories: [tech]
 
 `netfilter`允许在网络数据包处理流程的各个阶段插入hook函数，可以根据预先定义的规则对数据包进行修改、过滤或传送。
 
-![iptables](https://cdn.mazhen.tech//images/202207112144668.png)
+![iptables](https://cdn.mazhen.tech/images/202207112144668.png)
 
 从上图可以看出，网络包的处理流程有五个关键节点：
 
@@ -76,7 +75,7 @@ categories: [tech]
 
 `iptables` 是按照`表`的维度来管理规则，`表`中包含多个`链`，`链`中包含`规则`列表。例如我们使用`sudo iptables -t filter -L` 查看`filter`表：
 
-![iptables](https://cdn.mazhen.tech//images/202207112144620.png)
+![iptables](https://cdn.mazhen.tech/images/202207112144620.png)
 
 可以看到，`filter`表中包含三个`链`，每个`链`中定义了多条规则。由于`filter`是缺省表，上面的命令可以简化为：`sudo iptables -L`，即不通过`-t`指定表时，操作的就是`filter`表。
 
@@ -179,7 +178,7 @@ sudo brctl addif br0 veth3
 sudo brctl show
 ```
 
-![brctl](https://cdn.mazhen.tech//images/202207112145791.png)
+![brctl](https://cdn.mazhen.tech/images/202207112145791.png)
 
 两个网卡`veth1`和`veth3`已经“插”在`bridge`上。
 
@@ -280,7 +279,7 @@ sudo sysctl net.ipv4.conf.all.forwarding=1
 sudo iptables -L
 ```
 
-![iptables](https://cdn.mazhen.tech//images/202207112146892.png)
+![iptables](https://cdn.mazhen.tech/images/202207112146892.png)
 
 如果缺省策略是`DROP`，需要设置为`ACCEPT`：
 
@@ -378,5 +377,4 @@ sudo ip link  del veth3
 
 本文我们在介绍了`veth`、`Linux bridge`、`iptables`等概念后，亲自动手模拟出了[docker bridge网络模型](https://docs.docker.com/network/bridge/)，并测试了几种场景的网络互通。实际上`docker network` 就是使用了上述技术，帮我们创建和维护网络。通过动手实验，相信你对docker bridge网络理解的更加深入。
 
-下一篇我将动手实验容器如何[利用`Overlay 网络`进行跨主机通信](./docker-overlay-networks/)。
-
+下一篇我将动手实验容器如何[利用`Overlay 网络`进行跨主机通信](/docker-overlay-networks)。

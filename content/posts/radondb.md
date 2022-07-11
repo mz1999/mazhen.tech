@@ -16,7 +16,7 @@ categories: [tech]
 
 先简单看下`RadonDB`的整体架构：存储/计算分离。存储节点是`MySQL`，3个一组用`raft`实现数据的强一致性，不再是异步/半同步复制，数据的安全性、可用性级别更高。上层是`SQL节点`，负责客户端连接、SQL语句的解析和执行、分布式事务协调、数据sharding逻辑等。右下脚`计算节点`的作用，后面会解释。
 
-![](https://cdn.mazhen.tech//images/202207011444858.png)
+![](https://cdn.mazhen.tech/images/202207011444858.png)
 
 在知乎上看到[<如何评价青云开源的分布式数据库 radondb>](https://www.zhihu.com/question/276564413)，`RandoDB`被吐槽的很厉害。我们从这些吐槽可以了解产品宣传之外的一些信息，知道做这种中间件不是那么容易。大家对`RandoDB`的几个关键特性的实现方式都不太满意。让我们逐一看看。
 

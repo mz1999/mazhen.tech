@@ -52,7 +52,7 @@ fmt.Println()
 
 运行结果如下：
 
-![](https://cdn.mazhen.tech//images/202207011422594.png)
+![](https://cdn.mazhen.tech/images/202207011422594.png)
 
 对于初始化容量为3的`slice`，在向这个`slice` append 新元素时，底层会创建一个容量翻倍的新数组，并将原先的内容复制过来，再将新元素`append`到最后。我们可以看到这个`slice`内部保存底层数组的指针在第一次`append`后，指向了新的地址。当再向它`append`新元素时，由于底层数组还有空间，内部指针保持不变，只是更新`Len`属性为5。
 
@@ -88,7 +88,7 @@ func main() {
 
 运行结果为：
 
-![](https://cdn.mazhen.tech//images/202207011422106.png)
+![](https://cdn.mazhen.tech/images/202207011422106.png)
 
 在函数调用时，传递给函数的`slice`进行了复制，函数的参数是一个新的`slice`，但`slice`内部指针指向的底层数组还是同一个。
 

@@ -24,7 +24,7 @@ cd tidb-docker-compose && sudo docker-compose up -d
 
 就这么简单，集群启动成功了。使用`docker ps`查看：
 
-![](https://cdn.mazhen.tech//images/202207011433415.png)
+![](https://cdn.mazhen.tech/images/202207011433415.png)
 
 可以看到，已经启动了三个`tikv`实例，一个`tidb`实例，三个`pd`实例，还有监控和`tidb-vision`。
 
@@ -42,7 +42,7 @@ mysql -h 127.0.0.1 -P 4000 -u root
 
 如果本机没有`MySQL`客户端，可以使用docker启动一个`MySQL`容器，然后登录到容器内，再使用`MySQL`客户端连接`TiDB`集群。这种方式比较环保，只要有docker环境就行。先查看`TiDB`集群的`docker`网络：
 
-![](https://cdn.mazhen.tech//images/202207011434062.png)
+![](https://cdn.mazhen.tech/images/202207011434062.png)
 
 然后启动MySQL容器，注意要加入`TiDB`集群的`docker`网络：
 
