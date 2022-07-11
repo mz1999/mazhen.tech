@@ -1,5 +1,5 @@
 ---
-title: "Container Innovation"
+title: "容器技术创新漫谈"
 date: 2018-12-16T22:03:21+08:00
 draft: false
 tags: [docker,linux,networking]
@@ -33,8 +33,6 @@ categories: [tech]
 实际上，操作系统的实现依赖 `CPU` 提供的功能。现代的`CPU`体系架构都提供几种特权级别，每个特权级别有各种限制。各级别可以看作是环，内环能够访问更多的功能，外环则较少，被称为[protection rings](https://en.wikipedia.org/wiki/Protection_ring)：
 
 <img src="https://cdn.mazhen.tech//images/202207112207458.png" style="zoom: 25%;" />
-
-
 
  `Intel` 的 `CPU` 提供了4种特权级别， `Linux` 只使用了 `Ring0` 和 `Ring3` 两个级别。`Ring 0` 拥有最多的特权，它可以直接和CPU、内存等物理硬件交互。 `Ring 0` 被称为`内核态`，操作系统内核正是运行在`Ring 0`。`Ring 3`被称为`用户态`，应用程序运行在`用户态`。
 
@@ -76,8 +74,7 @@ categories: [tech]
 
 <img src="https://cdn.mazhen.tech//images/202207112209569.png" style="zoom:67%;" />
 
-
-### KVM & QEMU 
+### KVM & QEMU
 
 实际上`Type-1`和`Type-2`并没有严格的区分，像最常见的虚拟化软件 [KVM](https://www.linux-kvm.org/)（Kernel-based Virtual Machine）是一个`Linux`内核模块，加载`KVM`后`Linux`内核就转换成了`Type-1 hypervisor`。同时，`Linux`还是一个通用的操作系统，也可以认为`KVM`是运行在`Linux`之上的`Type-2 hypervisor`。
 
@@ -165,7 +162,6 @@ Google 开源的[gVisor](https://github.com/google/gvisor)为了实现安全容�
 虽然 `gVisor` 今年才开源，但它已经在[Google App Engine](https://cloud.google.com/appengine/) 和 [Google Cloud Functions](https://cloud.google.com/functions/docs/)运行了多年。
 
 <img src="https://cdn.mazhen.tech//images/202207112213737.png" style="zoom: 50%;" />
-
 
 `gVisor`作为运行应用的安全沙箱，扮演着`Virtual kernel`的角色。同时`gVisor` 包含了一个兼容[Open Container Initiative (OCI)](https://www.opencontainers.org/) 的运行时`runsc`，因此可以用它替换掉 Docker 的 `runc`，整合进`Kubernetes`生态圈，为`Kubernetes`带来另一种安全容器的实现方案。
 
