@@ -14,30 +14,26 @@ categories: [tech]
 
 HSF的请求和响应
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011417781.png)
-
+![](https://cdn.mazhen.tech//images/202207011417781.png)
 
 HSF的心跳协议
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011417651.png)
-
+![](https://cdn.mazhen.tech//images/202207011417651.png)
 
 点击某个数据包，可以在Packet details区域查看详细的协议内容：
 HSF请求
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011418183.png)
-
+![](https://cdn.mazhen.tech//images/202207011418183.png)
 
 可以看到很多协议的重要信息，包括序列化方式，超时时间，服务名称、方法及参数
 
 HSF响应
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011418163.png)
-
+![](https://cdn.mazhen.tech//images/202207011418163.png)
 
 HeartBeat请求
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011419145.png)
+![](https://cdn.mazhen.tech//images/202207011419145.png)
 
 心跳协议比较简单，响应就不看了。
 

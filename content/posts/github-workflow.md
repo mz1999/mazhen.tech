@@ -10,7 +10,7 @@ Zion项目我们采用[Feature Branch Workflow](https://www.atlassian.com/git/tu
 
 由于是内部项目，我们没有使用`fork`机制，代码都维护在Github上的一个仓库：[apusic/zion](https://github.com/apusic/zion)。在看具体的流程前，先有一个全局视图：
 
-![git](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011427447.png)
+![git](https://cdn.mazhen.tech//images/202207011427447.png)
 
 ## 基本工作流程
 

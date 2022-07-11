@@ -12,7 +12,7 @@ categories: [tech]
 
 ### 一、连接建立
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011113863.png" style="zoom:67%;" />
+<img src="https://cdn.mazhen.tech//images/202207011113863.png" style="zoom:67%;" />
 
 简单看下连接的建立过程，客户端向server发送`SYN`包，server回复`SYN＋ACK`，同时将这个处于`SYN_RECV`状态的连接保存到半连接队列。客户端返回`ACK`包完成三次握手，server将`ESTABLISHED`状态的连接移入`accept`队列，等待应用调用`accept()`。
 
@@ -25,7 +25,6 @@ categories: [tech]
     #include <sys/socket.h>
     int listen(int sockfd, int backlog);
     ```
-    
 
 如果我们设置的`backlog`大于`net.core.somaxconn`，`accept`队列的长度将被设置为`net.core.somaxconn`
 
@@ -35,8 +34,7 @@ categories: [tech]
 
 先看看接收数据包经过的路径：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011113357.png" style="zoom:67%;" />
-
+<img src="https://cdn.mazhen.tech//images/202207011113357.png" style="zoom:67%;" />
 
 数据包的接收，从下往上经过了三层：网卡驱动、系统内核空间，最后到用户态空间的应用。Linux内核使用`sk_buff`([socket kernel buffers](http://vger.kernel.org/~davem/skb.html))数据结构描述一个数据包。当一个新的数据包到达，`NIC`（network interface controller）调用`DMA engine`，通过`Ring Buffer`将数据包放置到内核内存区。`Ring Buffer`的大小固定，它不包含实际的数据包，而是包含了指向`sk_buff`的描述符。当`Ring Buffer`满的时候，新来的数据包将给丢弃。一旦数据包被成功接收，`NIC`发起中断，由内核的中断处理程序将数据包传递给IP层。经过IP层的处理，数据包被放入队列等待TCP层处理。每个数据包经过TCP层一系列复杂的步骤，更新TCP状态机，最终到达`recv Buffer`，等待被应用接收处理。有一点需要注意，数据包到达`recv Buffer`，TCP就会回`ACK`确认，既TCP的`ACK`表示数据包已经被操作系统内核收到，但并不确保应用层一定收到数据（例如这个时候系统crash），因此一般建议应用协议层也要设计自己的`ACK`确认机制。
 
@@ -56,8 +54,7 @@ categories: [tech]
 
   详细的说明参考内核文档[Linux Ethernet Bonding Driver HOWTO](https://www.kernel.org/doc/Documentation/networking/bonding.txt)。我们可以通过`cat /proc/net/bonding/bond0`查看本机的Bonding模式：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011114466.png" style="zoom:67%;" />
-
+<img src="https://cdn.mazhen.tech//images/202207011114466.png" style="zoom:67%;" />
 
   一般很少需要开发去设置网卡Bonding模式，自己实验的话可以参考[这篇文档](http://linux.cloudibee.com/2009/10/linux-network-bonding-setup-guide/)
 
@@ -67,15 +64,13 @@ categories: [tech]
 
   首先查看网卡是否支持多队列，使用`lspci -vvv`命令，找到`Ethernet controller`项：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011115916.png" style="zoom:67%;" />
-
+<img src="https://cdn.mazhen.tech//images/202207011115916.png" style="zoom:67%;" />
 
   如果有MSI-X， Enable+ 并且Count > 1，则该网卡是多队列网卡。
 
   然后查看是否打开了网卡多队列。使用命令`cat /proc/interrupts`，如果看到eth0-TxRx-0表明多队列支持已经打开：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011115744.png)
-
+![](https://cdn.mazhen.tech//images/202207011115744.png)
 
   最后确认每个队列是否绑定到不同的CPU。`cat /proc/interrupts`查询到每个队列的中断号，对应的文件`/proc/irq/${IRQ_NUM}/smp_affinity`为中断号`IRQ_NUM`绑定的CPU核的情况。以十六进制表示，每一位代表一个CPU核：
 
@@ -101,19 +96,18 @@ categories: [tech]
 3. **Ring Buffer**
 
    `Ring Buffer`位于NIC和IP层之间，是一个典型的FIFO（先进先出）[环形队列](http://en.wikipedia.org/wiki/Circular_buffer)。`Ring Buffer`没有包含数据本身，而是包含了指向`sk_buff`（[socket kernel buffers](http://vger.kernel.org/~davem/skb.html)）的描述符。
-   
 
   可以使用`ethtool -g eth0`查看当前`Ring Buffer`的设置：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011116458.png)
+![](https://cdn.mazhen.tech//images/202207011116458.png)
 
   上面的例子接收队列为4096，传输队列为256。可以通过`ifconfig`观察接收和传输队列的运行状况：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011116204.png)
+![](https://cdn.mazhen.tech//images/202207011116204.png)
 
-  - **RX errors**：收包总的错误数
-  - **RX dropped**: 表示数据包已经进入了`Ring Buffer`，但是由于内存不够等系统原因，导致在拷贝到内存的过程中被丢弃。
-  - **RX overruns**: `overruns`意味着数据包没到`Ring Buffer`就被网卡物理层给丢弃了，而CPU无法及时的处理中断是造成`Ring Buffer`满的原因之一，例如中断分配的不均匀。   
+- **RX errors**：收包总的错误数
+- **RX dropped**: 表示数据包已经进入了`Ring Buffer`，但是由于内存不够等系统原因，导致在拷贝到内存的过程中被丢弃。
+- **RX overruns**: `overruns`意味着数据包没到`Ring Buffer`就被网卡物理层给丢弃了，而CPU无法及时的处理中断是造成`Ring Buffer`满的原因之一，例如中断分配的不均匀。
 
   当`dropped`数量持续增加，建议增大`Ring Buffer`，使用`ethtool -G`进行设置。
 
@@ -153,8 +147,7 @@ categories: [tech]
 
 发送数据包经过的路径：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011117967.png" style="zoom:67%;" />
-
+<img src="https://cdn.mazhen.tech//images/202207011117967.png" style="zoom:67%;" />
 
 和接收数据的路径相反，数据包的发送从上往下也经过了三层：用户态空间的应用、系统内核空间、最后到网卡驱动。应用先将数据写入TCP `send buffer`，TCP层将`send buffer`中的数据构建成数据包转交给IP层。IP层会将待发送的数据包放入队列`QDisc`(queueing discipline)。数据包成功放入`QDisc`后，指向数据包的描述符`sk_buff`被放入`Ring Buffer`输出队列，随后网卡驱动调用`DMA engine`将数据发送到网络链路上。
 
@@ -178,7 +171,7 @@ categories: [tech]
 
   `QDisc`的队列长度由`txqueuelen`设置，和接收数据包的队列长度由内核参数`net.core.netdev_max_backlog`控制所不同，`txqueuelen`是和网卡关联，可以用`ifconfig`命令查看当前的大小：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011117299.png)
+![](https://cdn.mazhen.tech//images/202207011117299.png)
 
   使用`ifconfig`调整`txqueuelen`的大小：
 
@@ -190,7 +183,7 @@ categories: [tech]
 
   和数据包的接收一样，发送数据包也要经过`Ring Buffer`，使用`ethtool -g eth0`查看：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011118456.png)
+![](https://cdn.mazhen.tech//images/202207011118456.png)
 
   其中`TX`项是`Ring Buffer`的传输队列，也就是发送队列的长度。设置也是使用命令`ethtool -G`。
 
@@ -200,15 +193,15 @@ categories: [tech]
 
   一般以太网的`MTU`（Maximum Transmission Unit）为1500 bytes，假设应用要发送数据包的大小为7300bytes，`MTU`1500字节 － IP头部20字节 － TCP头部20字节＝有效负载为1460字节，因此7300字节需要拆分成5个segment：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011118576.png)
+![](https://cdn.mazhen.tech//images/202207011118576.png)
 
   `Segmentation`(分片)操作可以由操作系统移交给网卡完成，虽然最终线路上仍然是传输5个包，但这样节省了CPU资源并带来性能的提升：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011118473.png)
+![](https://cdn.mazhen.tech//images/202207011118473.png)
 
   可以使用`ethtool -k eth0`查看网卡当前的offloading情况：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011119505.png)
+![](https://cdn.mazhen.tech//images/202207011119505.png)
 
   上面这个例子`checksum`和`tcp segmentation`的`offloading`都是打开的。如果想设置网卡的`offloading`开关，可以使用`ethtool -K`(注意K是大写)命令，例如下面的命令关闭了tcp segmentation offload：
 
@@ -224,7 +217,7 @@ categories: [tech]
 
 **参考文档**
 
-* [Queueing in the Linux Network Stack](http://www.linuxjournal.com/content/queueing-linux-network-stack)
-* [TCP Implementation in Linux: A Brief Tutorial](http://www.ece.virginia.edu/cheetah/documents/papers/TCPlinux.pdf)
-* [Impact of Bandwidth Delay Product on TCP Throughput](http://sandilands.info/sgordon/impact-of-bandwidth-delay-product-on-tcp-throughput)
-* [Java程序员也应该知道的系统知识系列之网卡](http://hellojava.info/?p=292)
+- [Queueing in the Linux Network Stack](http://www.linuxjournal.com/content/queueing-linux-network-stack)
+- [TCP Implementation in Linux: A Brief Tutorial](http://www.ece.virginia.edu/cheetah/documents/papers/TCPlinux.pdf)
+- [Impact of Bandwidth Delay Product on TCP Throughput](http://sandilands.info/sgordon/impact-of-bandwidth-delay-product-on-tcp-throughput)
+- [Java程序员也应该知道的系统知识系列之网卡](http://hellojava.info/?p=292)

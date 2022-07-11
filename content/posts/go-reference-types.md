@@ -19,9 +19,9 @@ fmt.Printf("%#v \n", (*reflect.SliceHeader)(unsafe.Pointer(&s)))
 
 ```
 type SliceHeader struct {
-	Data uintptr
-	Len  int
-	Cap  int
+ Data uintptr
+ Len  int
+ Cap  int
 }
 ```
 
@@ -29,8 +29,7 @@ type SliceHeader struct {
 
 上面的代码运行结果如下：
 
-`&reflect.SliceHeader{Data:0xc420078180, Len:3, Cap:3} `
-
+`&reflect.SliceHeader{Data:0xc420078180, Len:3, Cap:3}`
 
 `slice`可以自动扩容，当底层数组容量不够时，会自动创建一个新的数组替换。让我们做个实验：
 
@@ -53,7 +52,7 @@ fmt.Println()
 
 运行结果如下：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011422594.png)
+![](https://cdn.mazhen.tech//images/202207011422594.png)
 
 对于初始化容量为3的`slice`，在向这个`slice` append 新元素时，底层会创建一个容量翻倍的新数组，并将原先的内容复制过来，再将新元素`append`到最后。我们可以看到这个`slice`内部保存底层数组的指针在第一次`append`后，指向了新的地址。当再向它`append`新元素时，由于底层数组还有空间，内部指针保持不变，只是更新`Len`属性为5。
 
@@ -61,35 +60,35 @@ fmt.Println()
 
 ```
 func foo(s []string) {
-	fmt.Println("======= func foo =======")
-	s = append(s, "f")
-	fmt.Printf("%#v \n", s)
-	fmt.Printf("%#v \n", (*reflect.SliceHeader)(unsafe.Pointer(&s)))
-	fmt.Printf("&s: %p \n", &s)
-	fmt.Println("========================\n")
+ fmt.Println("======= func foo =======")
+ s = append(s, "f")
+ fmt.Printf("%#v \n", s)
+ fmt.Printf("%#v \n", (*reflect.SliceHeader)(unsafe.Pointer(&s)))
+ fmt.Printf("&s: %p \n", &s)
+ fmt.Println("========================\n")
 }
 
 func main() {
 
    ......
    
-	s = append(s, "e")
-	fmt.Printf("%#v \n", s)
-	fmt.Printf("%#v \n", (*reflect.SliceHeader)(unsafe.Pointer(&s)))
-	fmt.Printf("&s: %p \n", &s)
-	fmt.Println()
+ s = append(s, "e")
+ fmt.Printf("%#v \n", s)
+ fmt.Printf("%#v \n", (*reflect.SliceHeader)(unsafe.Pointer(&s)))
+ fmt.Printf("&s: %p \n", &s)
+ fmt.Println()
 
-	foo(s)
+ foo(s)
 
-	fmt.Printf("%#v \n", s)
-	fmt.Printf("%#v \n", (*reflect.SliceHeader)(unsafe.Pointer(&s)))
-	fmt.Printf("&s: %p \n", &s)
+ fmt.Printf("%#v \n", s)
+ fmt.Printf("%#v \n", (*reflect.SliceHeader)(unsafe.Pointer(&s)))
+ fmt.Printf("&s: %p \n", &s)
 }
 ```
 
 运行结果为：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011422106.png)
+![](https://cdn.mazhen.tech//images/202207011422106.png)
 
 在函数调用时，传递给函数的`slice`进行了复制，函数的参数是一个新的`slice`，但`slice`内部指针指向的底层数组还是同一个。
 
@@ -110,25 +109,25 @@ type StringHeader struct {
 // String converts slice to string without copy.
 // Use at your own risk.
 func String(b []byte) (s string) {
-	if len(b) == 0 {
-		return ""
-	}
-	pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	pstring := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	pstring.Data = pbytes.Data
-	pstring.Len = pbytes.Len
-	return
+ if len(b) == 0 {
+  return ""
+ }
+ pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+ pstring := (*reflect.StringHeader)(unsafe.Pointer(&s))
+ pstring.Data = pbytes.Data
+ pstring.Len = pbytes.Len
+ return
 }
 
 // Slice converts string to slice without copy.
 // Use at your own risk.
 func Slice(s string) (b []byte) {
-	pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	pstring := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	pbytes.Data = pstring.Data
-	pbytes.Len = pstring.Len
-	pbytes.Cap = pstring.Len
-	return
+ pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+ pstring := (*reflect.StringHeader)(unsafe.Pointer(&s))
+ pbytes.Data = pstring.Data
+ pbytes.Len = pstring.Len
+ pbytes.Cap = pstring.Len
+ return
 }
 ```
 

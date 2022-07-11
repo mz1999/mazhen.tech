@@ -8,7 +8,6 @@ categories: [tech]
 
 当[TiDB 源码阅读系列](https://pingcap.com/blog-cn/#%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB)更新到第六篇[《Select 语句概览》](https://pingcap.com/blog-cn/tidb-source-code-reading-6/)时，我发现需要一些关系数据库的基础知识才能更好的理解，例如逻辑查询计划优化其实就是：使用**代数定律**对查询语句的**代数表达式树**做等价转换，使改进后的**代数表达式树**预期可以生成更有效的**物理查询计划**。有了这些基础知识，看代码才能做到知其然知其所以然。本文希望通过梳理关系数据库背后的知识，为读懂 `TiDB` 查询处理器部分的源码扫清障碍。
 
-
 ## 极简数据库发展史
 
 数据库的应用及其广泛，已经成为信息系统的核心技术和重要的基础设施。简单说数据库需要做两件事：存储数据，以及随后在你需要的时候能访问读取数据。
@@ -102,7 +101,7 @@ categories: [tech]
 * **选择**（selection)，当**选择**操作符应用到关系`R`上时，产生一个关系R的元组的子集合。结果关系元组必须满足某个涉及`R`中属性的条件`C`，表示为 σ<sub>C</sub>( R )
 * **投影** （projection），用来从一个关系生成一个新的关系，这个关系只包含原来关系`R`中的部分列。表达式 π<sub>A1,A2,...,An</sub> ( R ) 的值是这样一个关系，它只包含关系`R`属性`A1,A2,...An`所代表的列。
 
-* **θ连接**，关系R和关系S满足条件C的**θ连接**可以用这样的符号来表示： R ⋈<sub>C</sub> S 
+* **θ连接**，关系R和关系S满足条件C的**θ连接**可以用这样的符号来表示： R ⋈<sub>C</sub> S
 
 **θ连接**的结果这样构造：
 
@@ -126,7 +125,6 @@ categories: [tech]
 | 7    | 8    | 10   |
 
 R ⋈ <sub> A\<D  AND  R.B ≠ S.B</sub> S 的结果是：
-
 
 | A    | R.B  | R.C  | S.B  | S.C  | D    |
 | ---- | ---- | ---- | ---- | ---- | ---- |
@@ -173,7 +171,6 @@ R ⋈ <sub> A\<D  AND  R.B ≠ S.B</sub> S 的结果是：
 * **分组操作**（grouping）根据元组在一个或多个属性上的值把关系的元组拆成“组”。这样聚集操作就可以对分组的各个列进行计算。分组操作符 `γ` 是组合了**分组**和**聚合操作**的一个算子。例如表达式： γ <sub>gender, COUNT(emp_no)->count</sub>(employees) 代表把性别（`gender`）作为分组属性，然后对每一个分组进行`COUNT(emp_no)`的操作。
 * **排序算子**（sorting operator）如果关系`R`的模式是 `R(A,B,C)`，那么 τ<sub>C</sub>( R ) 就把`R`中的元组按照属性`C`的值排序。
 
-
 ### 关系代数小结
 
 上面的知识有些枯燥，但非常容易理解，因为我们经常使用关系数据库，已经接受了这些概念。掌握了一些关系代数的知识，在阅读`TiDB`源码时，当看到`selection`、`projection` 这些术语就能一下想到它们对应的关系代数运算符。
@@ -198,7 +195,7 @@ R ⋈ <sub> A\<D  AND  R.B ≠ S.B</sub> S 的结果是：
 
 一般查询处理可以简单的划分为以下几个步骤：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011706716.png" style="zoom:50%;" />
+<img src="https://cdn.mazhen.tech//images/202207011706716.png" style="zoom:50%;" />
 
 1. 对SQL进行语法分析，将查询语句转换成**抽象语法树**。
 2. 把**抽象语法树**转换成**关系代数表达式树**，这就是初始的**逻辑查询计划**。
@@ -236,28 +233,23 @@ WHERE employees.emp_no = salaries.emp_no AND
       salary > 7000;
 ```
 
-
 ### SQL 语法分析
 
 `SQL Parser`的功能是把SQL语句按照SQL语法规则进行解析，将文本转换成**抽象语法树**（AST）。具体的实现可以参考这篇文章[《TiDB SQL Parser 的实现》](https://github.com/mz1999/Apusic-db-team/blob/master/docs/sql-parser.md)。 示例SQL解析完成后得到下面的语法树：
 
-![](https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011707079.png)
-
+![](https://cdn.mazhen.tech//images/202207011707079.png)
 
 ### 生成逻辑查询计划
 
 现在将上一步生成的语法树转换成**关系代数表达式树**，也就是**逻辑查询计划**。对于示例SQL的抽象语法树转换过程如下：
 
 * `<FromList>` 中涉及的关系`employees`和`salaries`做笛卡尔积运算
-*  选择（selection）运算 σ<sub>C</sub>，其中`C`被替换成`<Condition>`表达式，即`employees.emp_no = salaries.emp_no AND salary > 7000`
-*  投影（projection） π<sub>L</sub>，其中`L`是`<SelList>`中的属性列表，对于这个查询只有一个属性`name`
+* 选择（selection）运算 σ<sub>C</sub>，其中`C`被替换成`<Condition>`表达式，即`employees.emp_no = salaries.emp_no AND salary > 7000`
+* 投影（projection） π<sub>L</sub>，其中`L`是`<SelList>`中的属性列表，对于这个查询只有一个属性`name`
 
 我们得到下面的关系代数表达式树：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011707826.png" style="zoom:67%;" />
-
-
-
+<img src="https://cdn.mazhen.tech//images/202207011707826.png" style="zoom:67%;" />
 
 ### 逻辑查询计划的改进
 
@@ -275,9 +267,7 @@ R ∪ S = S ∪ R; (R ∪ S) ∪ T = R ∪ (S ∪ T)
 
 R ∩ S = S ∩ R; (R ∩ S) ∩ T = R ∩ (S ∩ T)
 
-
 * 涉及选择的定律
-
 
 σ<sub>C1 AND C2</sub> = σ<sub>C1</sub>(σ<sub>C2</sub>( R ))
 
@@ -285,16 +275,15 @@ R ∩ S = S ∩ R; (R ∩ S) ∩ T = R ∩ (S ∩ T)
 
 σ<sub>C1</sub>(σ<sub>C2</sub>( R )) = σ<sub>C2</sub>(σ<sub>C1</sub>( R ))
 
-
 * 下推选择
 
 在表达式中下推选择是查询优化器最强有力的工具。
 
 σ<sub>C</sub>( R × S ) = σ<sub>C</sub>( R ) × S
 
-σ<sub>C</sub>( R ⋈ S) = σ<sub>C</sub>( R ) ⋈ S 
+σ<sub>C</sub>( R ⋈ S) = σ<sub>C</sub>( R ) ⋈ S
 
-σ<sub>C</sub>( R ⋈<sub>D</sub> S) = σ<sub>C</sub>( R ) ⋈<sub>D</sub> S 
+σ<sub>C</sub>( R ⋈<sub>D</sub> S) = σ<sub>C</sub>( R ) ⋈<sub>D</sub> S
 
 * 涉及连接和笛卡尔积的定律
 
@@ -308,12 +297,12 @@ R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S)
 
 另外还有涉及投影的定律、涉及分组和聚集的定律。这部分有些理论化，可以参考这篇[《TiDB 源码阅读系列文章（七）基于规则的优化》](https://pingcap.com/blog-cn/tidb-source-code-reading-7/)看看 `TiDB` 具体是怎么做的。
 
-对于本例使用到的定律比较简单。先将选择的两部分分解为 σ<sub>employees.emp_no = salaries.emp_no</sub> 
-和 σ<sub>salary > 7000</sub>，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S) 
+对于本例使用到的定律比较简单。先将选择的两部分分解为 σ<sub>employees.emp_no = salaries.emp_no</sub>
+和 σ<sub>salary > 7000</sub>，后者可以在树中下推。第一个条件涉及笛卡尔积两边的属性，可以把上面提到的定律 R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S)
 
 从右向左使用，把**笛卡尔积**转换成**连接**。使用了两个定律后，得到优化后的逻辑查询计划如下图：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011708287.png" style="zoom:67%;" />
+<img src="https://cdn.mazhen.tech//images/202207011708287.png" style="zoom:67%;" />
 
 ### 物理查询计划的生成
 
@@ -355,7 +344,7 @@ R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S)
 
 `σ`选择结点一般有两种选择：
 
-1. 可以简单的用物理过滤运算符`Filter( C )`替代 σ<sub>C</sub>( R ) 
+1. 可以简单的用物理过滤运算符`Filter( C )`替代 σ<sub>C</sub>( R )
 2. 如果`C`是一个带有比较运算符的条件，例如 `A = 100`，并且属性`A`上有索引，可以把比较运算合并到**扫描运算符**：`IndexScan(R, A = 100)`。
 
 对于本例，`salary` 一般都不会建立索引，因此可以把`σ( salary > 7000 )` 替换为 `Filter( salary > 7000 )`
@@ -381,10 +370,7 @@ R ⋈<sub>C</sub> S = σ<sub>C</sub>( R × S)
 
 最后，假定我们在所有选择的组合中，确定了其中一个作为最优的物理查询计划，然后就可以把它交给查询执行器真正的执行了：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011710602.png" style="zoom:50%;" />
-
-
-
+<img src="https://cdn.mazhen.tech//images/202207011710602.png" style="zoom:50%;" />
 
 ## 写在最后
 

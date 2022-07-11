@@ -14,8 +14,7 @@ categories: [tech]
 
 * 逻辑运算符可能有多种候选的物理算子供选择，如下表：
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011441145.png" style="zoom:67%;" />
-
+<img src="https://cdn.mazhen.tech//images/202207011441145.png" style="zoom:67%;" />
 
 * 有些物理算子会根据参与运算的属性、属性的顺序等因素，生成多种物理执行计划，例如`Join`的物理算子会根据参与连接的表的顺序，生成多种可能的执行计划。
 
@@ -23,18 +22,18 @@ CBO核心流程的代码在`plan/optimizer.go`中的`physicalOptimize`：
 
 ```
 func physicalOptimize(logic LogicalPlan) (PhysicalPlan, error) {
-	logic.preparePossibleProperties()
-	_, err := logic.deriveStats()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	t, err := logic.findBestTask(&requiredProp{taskTp: rootTaskType, expectedCnt: math.MaxFloat64})
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	p := t.plan()
-	p.ResolveIndices()
-	return p, nil
+ logic.preparePossibleProperties()
+ _, err := logic.deriveStats()
+ if err != nil {
+  return nil, errors.Trace(err)
+ }
+ t, err := logic.findBestTask(&requiredProp{taskTp: rootTaskType, expectedCnt: math.MaxFloat64})
+ if err != nil {
+  return nil, errors.Trace(err)
+ }
+ p := t.plan()
+ p.ResolveIndices()
+ return p, nil
 }
 ```
 
@@ -43,9 +42,7 @@ func physicalOptimize(logic LogicalPlan) (PhysicalPlan, error) {
 * `logic.preparePossibleProperties()`：裁剪参与运算的属性，从而尽可能早的裁减掉成物理计划搜索路径上的分支
 * `logic.deriveStats()`：为每个逻辑计划节点生成统计信息，为评估物理计划的代价做准备
 
-![<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011441188.png" style="zoom:67%;" />
-
-
+![<img src="https://cdn.mazhen.tech//images/202207011441188.png" style="zoom:67%;" />
 
 * `logic.findBestTask`：生成执行代价最小的`task`
 
@@ -53,29 +50,29 @@ func physicalOptimize(logic LogicalPlan) (PhysicalPlan, error) {
 
 ```
 for _, pp := range p.self.exhaustPhysicalPlans(prop) {
-	// find best child tasks firstly.
-	childTasks = childTasks[:0]
-	for i, child := range p.children {
-		childTask, err := child.findBestTask(pp.getChildReqProps(i))
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		childTasks = append(childTasks, childTask)
-	}
+ // find best child tasks firstly.
+ childTasks = childTasks[:0]
+ for i, child := range p.children {
+  childTask, err := child.findBestTask(pp.getChildReqProps(i))
+  if err != nil {
+   return nil, errors.Trace(err)
+  }
+  childTasks = append(childTasks, childTask)
+ }
 
-	// combine best child tasks with parent physical plan.
-	curTask := pp.attach2Task(childTasks...)
+ // combine best child tasks with parent physical plan.
+ curTask := pp.attach2Task(childTasks...)
 
-	// get the most efficient one.
-	if curTask.cost() < bestTask.cost() {
-		bestTask = curTask
-	}
+ // get the most efficient one.
+ if curTask.cost() < bestTask.cost() {
+  bestTask = curTask
+ }
 }
 ```
 
-首先枚举可能的物理执行计划`p.self.exhaustPhysicalPlans`，然后遍历每种候选计划，找到代价最小的`task`。这是个递归的过程，当前节点的代价是由所有子节点的代价组成的，所以在遍历的过程中，又会调用` child.findBestTask(pp.getChildReqProps(i))`找到子节点的最佳`task`。
+首先枚举可能的物理执行计划`p.self.exhaustPhysicalPlans`，然后遍历每种候选计划，找到代价最小的`task`。这是个递归的过程，当前节点的代价是由所有子节点的代价组成的，所以在遍历的过程中，又会调用`child.findBestTask(pp.getChildReqProps(i))`找到子节点的最佳`task`。
 
-<img src="https://images-1251716363.cos.ap-guangzhou.myqcloud.com/images/202207011442083.png" style="zoom:67%;" />
+<img src="https://cdn.mazhen.tech//images/202207011442083.png" style="zoom:67%;" />
 
 如何评估物理执行计划的代价呢？根据参与运算的关系（表）的统计信息进行评估。代价评估相关逻辑涉及的代码：
 
